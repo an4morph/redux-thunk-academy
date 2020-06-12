@@ -1,23 +1,34 @@
 import React from 'react'
-import { connect } from 'react-redux'
-import { func, bool, string } from 'prop-types'
-import { addTodo as addTodoAction, getTodos as getTodosAction, addTodoReset } from '../../store/actions'
 import styles from './add.module.css'
 
-function AddTodoForm({ addTodo, success, getTodos, loading, failed, error, reset }) {
+const endpoint = 'http://localhost:3030'
+const errorHandler = (error) => (error.response ? error.response.data : error.message)
+
+function AddTodoForm() {
   const [text, setText] = React.useState('')
   const [description, setDesc] = React.useState('')
-
-  React.useEffect(() => {
-    if (success) getTodos()
-    return () => {
-      reset()
-    }
-  }, [getTodos, reset, success])
+  const [loading, setLoading] = React.useState(false)
+  const [failed, setFailed] = React.useState(false)
+  const [error, setError] = React.useState(false)
 
   const handleClick = (e) => {
     e.preventDefault()
-    addTodo({ text, description })
+    setLoading(true)
+    fetch(`${endpoint}/add`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, description }),
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error('ошибка добавления')
+        setLoading(false)
+        return response.json()
+      })
+      .catch((err) => {
+        setLoading(false)
+        setFailed(true)
+        setError(errorHandler(err))
+      })
   }
 
   return (
@@ -50,27 +61,4 @@ function AddTodoForm({ addTodo, success, getTodos, loading, failed, error, reset
   )
 }
 
-AddTodoForm.propTypes = {
-  addTodo: func.isRequired,
-  reset: func.isRequired,
-  getTodos: func.isRequired,
-  success: bool.isRequired,
-  loading: bool.isRequired,
-  failed: bool.isRequired,
-  error: string,
-}
-
-const mapStateToProps = (state) => ({
-  loading: state.todo.add.loading,
-  success: state.todo.add.success,
-  failed: state.todo.add.failed,
-  error: state.todo.add.error,
-})
-
-const mapDispatchToProps = (dispatch) => ({
-  addTodo: (data) => dispatch(addTodoAction(data)),
-  getTodos: () => dispatch(getTodosAction()),
-  reset: () => dispatch(addTodoReset()),
-})
-
-export default connect(mapStateToProps, mapDispatchToProps)(AddTodoForm)
+export default AddTodoForm
