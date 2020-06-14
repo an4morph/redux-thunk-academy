@@ -39,3 +39,21 @@ export const addTodo = (body) => (dispatch) => {
 export const addTodoReset = () => ({
   type: 'ADD_TODO_RESET',
 })
+
+export const deleteTodo = (id) => (dispatch) => {
+  dispatch({ type: 'DELETE_TODO_LOADING' })
+  fetch(`${endpoint}/delete/${id}`, {
+    method: 'DELETE',
+  })
+    .then((response) => checkResponse(response, 'Ошибка добавления'))
+    .then(() => {
+      dispatch({ type: 'DELETE_TODO_SUCCESS' })
+    })
+    .catch((error) => {
+      dispatch({ type: 'DELETE_TODO_FAILED', error: errorHandler(error) })
+    })
+}
+
+export const deleteTodoReset = () => ({
+  type: 'DELETE_TODO_RESET',
+})

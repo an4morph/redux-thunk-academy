@@ -12,6 +12,12 @@ const initialState = {
     failed: false,
     error: '',
   },
+  delete: {
+    success: false,
+    loading: false,
+    failed: false,
+    error: '',
+  },
 }
 
 const reducer = (state = initialState, action) => {
@@ -82,6 +88,41 @@ const reducer = (state = initialState, action) => {
       return {
         ...state,
         add: initialState.add,
+      }
+    case 'DELETE_TODO_SUCCESS':
+      return {
+        ...state,
+        delete: {
+          success: true,
+          loading: false,
+          failed: false,
+          error: '',
+        },
+      }
+    case 'DELETE_TODO_LOADING':
+      return {
+        ...state,
+        delete: {
+          success: false,
+          loading: true,
+          failed: false,
+          error: '',
+        },
+      }
+    case 'DELETE_TODO_FAILED':
+      return {
+        ...state,
+        delete: {
+          success: false,
+          loading: false,
+          failed: true,
+          error: action.error,
+        },
+      }
+      case 'DELETE_TODO_RESET':
+      return {
+        ...state,
+        delete: initialState.add,
       }
     default:
       return state
